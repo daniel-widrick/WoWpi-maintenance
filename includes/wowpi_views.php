@@ -50,6 +50,12 @@ function wowpi_show_guild($with = null,$guild_name = null, $realm = null)
   }
 }
 
+function displayCurrentSpecTitle($character_name = null, $realm = null)
+	{
+		$character_talents = wowpi_get_character('talents',$character_name,$realm);
+		return $character_talents[0]['name'];
+	}
+	
 function wowpi_show_character($with = array(),$character_name=null,$realm=null)
 {
   global $wowpi_options;
@@ -84,6 +90,7 @@ function wowpi_show_character($with = array(),$character_name=null,$realm=null)
   $battlegroup = $character_data['battlegroup'];  
   $class = $classes[$character_data['class']]['name'];
   $race = $races[$character_data['race']]['name'];
+  $specialization = displayCurrentSpecTitle($character_name,$realm);
   $side = $races[$character_data['race']]['side'];
   $gender = $character_data['gender'];
   $level = $character_data['level'];
@@ -106,35 +113,31 @@ function wowpi_show_character($with = array(),$character_name=null,$realm=null)
   ?>
   <div class="module character">
     <div class="character_name">
-      <?php echo $character;?>
+      <?php    if(strlen($thumbnail)>0)
+		{
+		  /*$upload_dir = wp_upload_dir();
+		  $image = $upload_dir['basedir'].'/wowpi/character_avatar_'.$thumbnail.'.jpg';
+		  if(file_exists($image))
+		  {
+			echo '<img src="'.$upload_dir['baseurl'].'/wowpi/character_avatar_'.$thumbnail.'.jpg'.'" class="character_image" />';
+			}*/
+		  $upload_dir = wp_upload_dir();
+		  $image = $upload_dir['basedir'].'/wowpi/character_inset_'.$thumbnail.'.jpg';
+		  if(file_exists($image))
+		  {
+			echo '<a href="'.$upload_dir['baseurl'].'/wowpi/character_profile_'.$thumbnail.'.jpg'.'"><img src="'.$upload_dir['baseurl'].'/wowpi/character_inset_'.$thumbnail.'.jpg'.'" class="character_image" /></a>';
+		  }
+		}
+		
+		echo '<a href="https://worldofwarcraft.com/en-us/character/aerie-peak/'.$character.'">';
+		if(isset($main_title))
+		{
+			printf($main_title,$character);
+		}
+  		else echo $character;?>
+		</a>
     </div>
-    <?php
-    if(!empty($guild) && strlen($guild['name'])>0)
-    {
-      ?>
-    <div class="character_guild">
-      <?php
-      echo '<div class="character_guild">'.__('of the ','wowpi').' '.$guild['name'].'</div>';
-    ?>
-    </div>
-    <?php
-    }
-    if(strlen($thumbnail)>0)
-    {
-      $upload_dir = wp_upload_dir();
-      $image = $upload_dir['basedir'].'/wowpi/character_avatar_'.$thumbnail.'.jpg';
-      if(file_exists($image))
-      {
-        echo '<img src="'.$upload_dir['baseurl'].'/wowpi/character_avatar_'.$thumbnail.'.jpg'.'" class="character_image" />';
-      }
-    }
-    if(isset($main_title))
-    {
-    ?>
-    <div class="character_title"><?php echo __('Also known as','wowpi');?><br /><span><?php printf($main_title,$character);?></span><br /><?php printf( __('Level %1$s %2$s %3$s','wowpi'), $level, $race, $class);?></div>
-    <?php
-    }
-  ?>
+    <div class="character_title"><?php printf( __('Level %1$s %2$s %3$s %4$s','wowpi'), $level, $race, $specialization, $class);?></div>
   </div>
   <?php
   if(!empty($with))
@@ -149,7 +152,7 @@ function wowpi_show_character($with = array(),$character_name=null,$realm=null)
     }
   }
   ?>
-   <div class="realm"><?php echo $battlegroup.' / '.$realm;?></div>
+   <!--<div class="realm"><?php echo $battlegroup.' / '.$realm;?></div>-->
 </div>
 <?php  
 }
@@ -244,6 +247,111 @@ function wowpi_show_professions($character_name = null,$realm = null, $with_titl
   }
   return $output;
 }
+
+function wowpi_show_pvp($character_name = null,$realm = null, $with_title = true)
+{
+	$pvp = wowpi_get_character('pvp',$character_name, $realm);
+	$character_data = wowpi_get_character(null, $character_name,$realm); 
+	$character_data['data']['pvp']['brackets'] = array(
+      '2v2' => $pvp['brackets']->ARENA_BRACKET_2v2,
+      '3v3' => $pvp['brackets']->ARENA_BRACKET_3v3,
+      'RBG' => $pvp['brackets']->ARENA_BRACKET_RBG
+	);
+	
+	//if (!empty($pvp['brackets']->ARENA_BRACKET_2v2->rating))
+	//{
+		//echo '<pre>';print_r($pvp['brackets']->ARENA_BRACKET_2v2->slug); echo'</pre>';
+	//}
+	$output .='<div class="module pvp">';
+	$output .='<div class="title">Season PvP Ratings:</div>';
+	
+	foreach($character_data['data']['pvp']['brackets'] as $bracket)
+	{
+		if (!empty($bracket->rating))
+		{
+			//echo '<pre>';print_r($bracket->slug);echo '</pre>';
+			$output .='<div class="pvp-bracket">';
+			$output .='<div class="bracket-name">'.$bracket->slug.'</div>';
+			$output .='<div class="bracket-rating">'.$bracket->rating.'</div>';
+			$output .='</div>';
+		}
+	}
+	
+	$output .='</div>';
+	
+	return $output;
+}
+
+
+function wowpi_show_progression($character_name = null,$realm = null, $with_title = true)
+{
+	$progression = wowpi_get_character('progression',$character_name,$realm);
+	$character_data = wowpi_get_character(null, $character_name,$realm); 
+	
+	$output .='<div class="module progression"><p>Uldir:</p>';
+	$output .='<p class="raid-progress">';
+	
+	foreach($progression['raids'] as $raids) {
+		if($raids->name == 'Uldir')
+		{
+			$lfr=0;
+			$normal=0;
+			$heroic=0;
+			$mythic=0;
+			foreach($raids->bosses as $bosses)
+			{
+				if (!empty($bosses->lfrKills))
+				{
+					$lfr++;
+				}
+				if (!empty($bosses->normalKills))
+				{
+					$normal++;
+				}
+				if (!empty($bosses->heroicKills))
+				{
+					$heroic++;
+				}
+				if (!empty($bosses->mythicKills))
+				{
+					$mythic++;
+				}
+			}
+			
+			if ($lfr>=8) {
+				$output .='<span class="lfr raid-clear">LFR: '.$lfr.'/8</span><br />';
+			}
+			else {
+				$output .='<span class="lfr">LFR: '.$lfr.'/8</span><br />';
+			}
+			if ($normal>=8) {
+				$output .='<span class="normal raid-clear">Normal: '.$normal.'/8</span><br />';
+			}
+			else {
+				$output .='<span class="normal">Normal: '.$normal.'/8</span><br />';
+			}
+			if ($heroic>=8) {
+				$output .='<span class="heroic raid-clear">Heroic: '.$heroic.'/8</span><br />';
+			}
+			else {
+				$output .='<span class="heroic">Heroic: '.$heroic.'/8</span><br />';
+			}
+			if ($mythic>=8) {
+				$output .='<span class="mythic raid-clear">Mythic: '.$mythic.'/8</span><br />';
+			}
+			else {
+				$output .='<span class="mythic">Mythic: '.$mythic.'/8</span><br />';
+			}
+			
+			
+		}
+	}
+	
+	$output .='</p></div>';
+	
+	return $output;
+}
+
 
 function wowpi_show_ilvl($character_name = null, $realm = null, $with_title = true)
 {
