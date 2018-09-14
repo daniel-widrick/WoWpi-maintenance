@@ -1,4 +1,15 @@
 <?php
+// Add settings link on plugin page
+function wowpi_settings_link($links) {
+    $settings_link = '<a href="options-general.php?page=wowpi">Settings</a>';
+    array_unshift($links, $settings_link);
+    return $links;
+}
+
+$plugin = plugin_basename(__FILE__);
+add_filter("plugin_action_links_$plugin", 'wowpi_settings_link' );
+
+
 
 // Incepem prin a adauga un link in meniul de admin
 add_action('admin_menu','wowpi_admin_add_page');
@@ -264,17 +275,34 @@ function wowpi_options_validate($input)
 	$tooltips_options = array('http://www.wowhead.com/','http://www.wowdb.com/','0');
 	$wowpi_new = $input['tooltips'];
 	$wowpi_options['tooltips'] = in_array($wowpi_new,$tooltips_options) ? $wowpi_new : '0';
-	
-	delete_option('wowpi_achievements');
-	delete_option('wowpi_characters');
-	delete_option('wowpi_guilds');
-	delete_option('wowpi_guilds_progress');
-	delete_option('wowpi_races');
-	delete_option('wowpi_realms');
-	delete_option('wowpi_classes');
-	delete_option('wowpi_artifact_weapons');
-	delete_option('wowpi_spells');
-	delete_option('wowpi_items');	
+
+	foreach ( wp_load_alloptions() as $option => $value ) {
+        if ( strpos( $option, 'wowpi_' ) === 0 && $option !== 'wowpi_options' && $option !== 'wowpi_version' ) {
+            delete_option( $option );
+        }
+    }
+
+    global $wowpi_plugin_dir;
+    $imageDir = $wowpi_plugin_dir.'assets/images/wow/';
+    if(file_exists($imageDir) && wp_is_writable($wowpi_plugin_dir.'assets/images/')) {
+        removeDirectory($imageDir);
+    }
+
+    $uploadDir = wp_upload_dir();
+    $wowpiUploadDir = $uploadDir['basedir'].'/wowpi/';
+    if(file_exists($wowpiUploadDir) && wp_is_writable($uploadDir['basedir'].'/')) {
+        removeDirectory($wowpiUploadDir);
+    }
+
+    // first saves
+    wowpi_getRaces();
+    wowpi_getClasses();
+    wowpi_getRealms();
+    wowpi_getCharacterAchievements();
+    wowpi_getGuildAchievements();
+    wowpi_getCharacterData();
+    wowpi_getGuildData();
+
 	return $wowpi_options;
 }
 

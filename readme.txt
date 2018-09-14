@@ -3,8 +3,8 @@ Contributors: avenirer
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=6PDPV9L47HC86
 Tags: World of Warcraft, wow, armory
 Requires at least: 3.0.1
-Tested up to: 4.9.6
-Stable tag: 2.3.8
+Tested up to: 4.9.7
+Stable tag: 2.4.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -212,10 +212,6 @@ You can use the following shortcodes inside your posts (or templates...):
 I sure hope not, but this being my first plugin I can't guarantee for everything. Anyway, you can at any time write me at **avenir.ro@gmail.com** or use the forum to report any issues or ask for more things. Also, please, do tell me if the plugin needs something else added or if you have some styling proposals.
 
 == Changelog ==
-= 2.3.8 =
-Trying to cope with api changes coming with Battle of Azeroth
-= 2.3.7 =
-...
 = 2.3.6 =
 Repaired the showing of allied races thumbs. Thank you @tectas for the fix. The problem was reported here: https://wordpress.org/support/topic/allied-races-image-error/
 = 2.3.6 =

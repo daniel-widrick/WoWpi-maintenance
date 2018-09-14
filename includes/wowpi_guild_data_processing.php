@@ -66,7 +66,7 @@ function wowpi_get_guild_progression($guild_name = null, $guild_realm = null)
   {
     
     $guild_achievements = wowpi_get_guild('achievements', $guild_name, $guild_realm);
-    $general_guild_achievements = wowpi_general_data('achievements','guild');
+    $general_guild_achievements = wowpi_getGuildAchievements();
     
     $dungeons_raids = array(
       'Legion' => array(
