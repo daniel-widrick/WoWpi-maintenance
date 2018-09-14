@@ -2,7 +2,7 @@
 function wowpi_get_character($field = null, $character_name = null, $realm = null, $region = null, $locale = null)
 {
   global $wowpi_options;
-  $characters = get_option('wowpi_characters');
+  $characters = wowpi_widrick_get_option('wowpi_characters');
   $caching = $wowpi_options['character_caching'];
   
   
@@ -50,7 +50,7 @@ function wowpi_get_character($field = null, $character_name = null, $realm = nul
   else
   {
     wowpi_call_api_character($characters, $character_name, $realm, $region, $locale);
-    $characters = get_option('wowpi_characters');
+    $characters = wowpi_widrick_get_option('wowpi_characters');
     $character_data = $characters[$realm][$character_name]['data'];
   }
 
@@ -60,6 +60,15 @@ function wowpi_get_character($field = null, $character_name = null, $realm = nul
 function wowpi_call_api_character($characters, $character_name, $realm = null, $region = null, $locale = null)
 {
     global $wowpi_options;
+	$characterHash = $region . '-' . $realm . '-' . $character_name;
+	$char_cache = wowpi_widrick_character_cache_get($characterHash);
+	if($char_cache !== false)
+	{
+		$characters[$realm][$character_name] = $char_cache;
+		wowpi_widrick_update_option('wowpi_characters', $characters);
+		return $char_cache;
+	}
+	
   
   // get ALL the fields
   $fields_arr = array(
@@ -106,7 +115,8 @@ function wowpi_call_api_character($characters, $character_name, $realm = null, $
                          'gender' => $decoded->gender,
                          'level' => $decoded->level,
                          'achievement_points' => $decoded->achievementPoints,
-                         'faction' => $decoded->faction)),
+                         'faction' => $decoded->faction,
+						 'pvp' => $decoded->pvp)),
     'last_update'=>$last_update
   );
   
@@ -321,5 +331,7 @@ function wowpi_call_api_character($characters, $character_name, $realm = null, $
   //unset($decoded->petSlots);
   
   $characters[$realm][$character_name] = $character_data;
-  update_option('wowpi_characters', $characters);
+  wowpi_widrick_update_option('wowpi_characters', $characters);
+	wowpi_widrick_character_cache_save($characterHash,$character_data);
+
 }

@@ -70,8 +70,8 @@ function wowpi_shortcode_guild_achievements($atts, $guild_name = '')
     $output .= '<ul>';
     foreach($achievement_arr as $achievement)
     {
-      $output .= '<li style="background-image: url(\''.wowpi_retrieve_image($achievement['the_achievement']['icon'], 'icon', 18).'\');"> ';
-			$output .= date('d.m.Y',$achievement['completed']).' - '.wowpi_get_tooltip($achievement['id'],'achievement', $achievement['the_achievement']['description']).' <span class="points">'.$achievement['the_achievement']['points'].'</span></li>';
+      $output .= '<li style="background-image: url(\''.wowpi_retrieve_image($achievement['the_achievement']['icon'], 'icon', 56).'\');"> ';
+			$output .= '<span class="desc">'.$achievement['the_achievement']['description'].' <span class="points">'.$achievement['the_achievement']['points'].'</span><br/><span class="cheeve-date">Earned: '.date('M d, Y',$achievement['completed']).'</span></span></li>';
     }
     $output .= '</ul>';
     $output .= '</div>';

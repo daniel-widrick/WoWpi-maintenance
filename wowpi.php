@@ -46,12 +46,16 @@ $wowpi_character_showable = array(
   'artifact_weapon' => __('Artifact Weapon','wowpi'),
   'kills' => __('Honorable Kills','wowpi'),
   'professions' => __('Professions','wowpi'),
-  'talents' => __('Talents','wowpi'));
+  'talents' => __('Talents','wowpi'),
+  'pvp' => __('PvP Brackets','wowpi'),
+  'progression' => __('Raid Progression','wowpi'));
 
 /********************************************
 * includes
 ********************************************/
 
+include('includes/wowpi_widrick_options.php');
+include('includes/wowpi_widrick_caching.php');
 include('includes/scripts.php'); // This controls all JS / CSS
 include('includes/wowpi_data_processing.php'); // This controls all saving of data
 include('includes/wowpi_item_data_processing.php');
